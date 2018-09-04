@@ -4511,7 +4511,14 @@ NULL
             addReplyError(c,"Invalid slot");
             return;
         }
-        addReplyLongLong(c,countKeysInSlot(slot));
+		
+        //addReplyLongLong(c,countKeysInSlot(slot));
+        if (server.cluster->slots[slot] == myself) {
+			addReplyLongLong(c,countKeysInSlot(slot));
+        } else {
+			clusterNode *rightNode = getNodeBySlot(slot);
+			clusterRedirectClient(c, rightNode, slot, CLUSTER_REDIR_MOVED);
+		}
     } else if (!strcasecmp(c->argv[1]->ptr,"getkeysinslot") && c->argc == 4) {
         /* CLUSTER GETKEYSINSLOT <slot> <count> */
         long long maxkeys, slot;
@@ -5393,6 +5400,28 @@ void readwriteCommand(client *c) {
     c->flags &= ~CLIENT_READONLY;
     addReply(c,shared.ok);
 }
+
+
+clusterNode *getNodeBySlot(int *hashslot)
+{
+	dictIterator *di;
+    dictEntry *de;
+	int bit;
+	clusterNode *node = NULL;
+    di = dictGetSafeIterator(server.cluster->nodes);
+    while((de = dictNext(di)) != NULL) {
+        node = dictGetVal(de);
+
+		if ((bit = clusterNodeGetSlotBit(node,hashslot)) != 0) {
+			break;
+		}
+
+    }
+    dictReleaseIterator(di);
+	return node;
+}
+
+
 
 /* Return the pointer to the cluster node that is able to serve the command.
  * For the function to succeed the command should only target either:

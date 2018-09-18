@@ -1687,6 +1687,12 @@ int getMaxmemoryState(size_t *total, size_t *logical, size_t *tofree, float *lev
 size_t freeMemoryGetNotCountedMemory();
 int freeMemoryIfNeeded(void);
 int processCommand(client *c);
+
+/* redis extern */
+void standardBeforeSleep(struct aeEventLoop *eventLoop);
+int standardProcessCommand(client *c);
+typedef int (*reProcessComandProc)(client *c);
+
 void setupSignalHandlers(void);
 struct redisCommand *lookupCommand(sds name);
 struct redisCommand *lookupCommandByCString(char *s);

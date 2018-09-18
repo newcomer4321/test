@@ -4,6 +4,8 @@
 #include "zmalloc.h"
 #include "server.h"
 #include <pthread.h>
+#include "cluster.h"
+#include <ctype.h>
 #define turnToAddr(addr)  (*((ssize_t*)addr))
 
 
@@ -85,11 +87,14 @@ struct reWorkerTable * workerInit(int workerSize);
 int sendToWork(reWorkerInfo *worker, client *clientData);
 
 int processCommandRE(client *cilientData);
- void  parseQuery(client * clientData);
-int sendToCombiner(reCombinerInfo *combiner);
+int parseQuery(client * clientData);
+int sendToCombiner(reCombinerInfo *combiner, client *clientData);
 
 void *workerThread(void *value);
 void beforeSleepRE(struct aeEventLoop *eventLoop);
 
-
+int execCommandRE(void *value);
 void *combinerThread(void *value);
+//aeBeforeSleepProc *aeBeforeSleepHook = NULL;
+//reProcessComandProc processComandProcREHook = NULL;
+

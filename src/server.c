@@ -55,7 +55,13 @@
 #include <sys/utsname.h>
 #include <locale.h>
 #include <sys/socket.h>
-
+#include "loadlib.h"
+//extern aeBeforeSleepProc *aeBeforeSleepHook;
+//extern reProcessComandProc processComandProcREHook;
+//
+aeBeforeSleepProc *aeBeforeSleepHook = NULL;
+reProcessComandProc processComandProcREHook = NULL;
+//
 /* Our shared "common" objects */
 
 struct sharedObjectsStruct shared;
@@ -1351,10 +1357,11 @@ int serverCron(struct aeEventLoop *eventLoop, long long id, void *clientData) {
     return 1000/server.hz;
 }
 
+
 /* This function gets called every time Redis is entering the
  * main loop of the event driven library, that is, before to sleep
  * for ready file descriptors. */
-void beforeSleep(struct aeEventLoop *eventLoop) {
+void standardBeforeSleep(struct aeEventLoop *eventLoop) {
     UNUSED(eventLoop);
 
     /* Call the Redis Cluster before sleep function. Note that this function
@@ -1406,6 +1413,14 @@ void beforeSleep(struct aeEventLoop *eventLoop) {
      * releasing the GIL. Redis main thread will not touch anything at this
      * time. */
     if (moduleCount()) moduleReleaseGIL();
+}
+
+void beforeSleep(struct aeEventLoop *eventLoop) {
+     if(aeBeforeSleepHook) {
+		(aeBeforeSleepHook)(eventLoop);
+     } else {
+         standardBeforeSleep(eventLoop);
+     }
 }
 
 /* This function is called immadiately after the event loop multiplexing
@@ -2521,7 +2536,7 @@ void call(client *c, int flags) {
  * If C_OK is returned the client is still alive and valid and
  * other operations can be performed by the caller. Otherwise
  * if C_ERR is returned the client was destroyed (i.e. after QUIT). */
-int processCommand(client *c) {
+int standardProcessCommand(client *c) {
     /* The QUIT command is handled separately. Normal command procs will
      * go through checking for replication and QUIT will cause trouble
      * when FORCE_REPLICATION is enabled and would be implemented in
@@ -2710,6 +2725,15 @@ int processCommand(client *c) {
     }
     return C_OK;
 }
+int processCommand(client *c)
+{
+	if(processComandProcREHook) {
+		return (*processComandProcREHook)(c);
+	} else {
+		return standardProcessCommand(c);
+	}
+}
+
 
 /*================================== Shutdown =============================== */
 

@@ -327,7 +327,8 @@ struct redisCommand redisCommandTable[] = {
     {"xtrim",xtrimCommand,-2,"wF",0,NULL,1,1,1,0,0},
     {"post",securityWarningCommand,-1,"lt",0,NULL,0,0,0,0,0},
     {"host:",securityWarningCommand,-1,"lt",0,NULL,0,0,0,0,0},
-    {"latency",latencyCommand,-2,"aslt",0,NULL,0,0,0,0,0}
+    {"latency",latencyCommand,-2,"aslt",0,NULL,0,0,0,0,0},
+	{"loadre",loadRedisExtern,2,"wm",0,NULL,1,1,1,0,0}
 };
 
 /*============================ Utility functions ============================ */

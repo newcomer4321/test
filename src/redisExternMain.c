@@ -1,7 +1,8 @@
 #include "server.h"
 #include "zmalloc.h"
 #include "loadlib.h"
-
+#include <string.h>
+#include <stdlib.h>
 extern aeBeforeSleepProc *aeBeforeSleepHook;
 extern reProcessComandProc processComandProcREHook;
 
@@ -377,24 +378,38 @@ void *combinerThread(void *value)
     while(run) {
         while(l->len == 0 || readlen > 0) {
             readlen = readChannel(pipefd, l);
-            sleep(1);
+            //sleep(1);
         }
         while(l->len > 0) {
             listNode *node = listPop(l);
-			execCommandRE(node->value);
+			client *tmpClient = (client *)turnToAddr(node->value);
+			if(strcmp("LOADRE", (char*)tmpClient->argv[0]->ptr) != 0) {
+				execCommandRE(tmpClient);
+			} else {
+				addReply(tmpClient,shared.ok);
+			}
+			if (tmpClient->flags & CLIENT_MASTER && !(tmpClient->flags & CLIENT_MULTI)) {
+                tmpClient->reploff = tmpClient->read_reploff - sdslen(tmpClient->querybuf);
+            }
+
+            if (!(tmpClient->flags & CLIENT_BLOCKED) || tmpClient->btype != BLOCKED_MODULE)
+                resetClient(tmpClient);
             zfree(node);
         }
 		standardBeforeSleep(server.el);
     }
     return NULL;
 }
-void loadRedisExtern(int workerSize)
+void loadRedisExtern(client *c)
 {
+
+	int workerSize = atoi((char *)c->argv[1]->ptr);
 	combiner = combinerInit(); 
 	workerTable = workerInit(workerSize);	
 	aeBeforeSleepHook = beforeSleepRE;
     processComandProcREHook = processCommandRE;
-	
+	sleep(1);
+	sendToCombiner(combiner, c);	
 }
 
 void unloadRedisExtern()

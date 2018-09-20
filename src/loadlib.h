@@ -95,6 +95,6 @@ void beforeSleepRE(struct aeEventLoop *eventLoop);
 
 int execCommandRE(void *value);
 void *combinerThread(void *value);
-//aeBeforeSleepProc *aeBeforeSleepHook = NULL;
-//reProcessComandProc processComandProcREHook = NULL;
 
+void unloadRedisExtern();
+ void loadRedisExtern(client *c);

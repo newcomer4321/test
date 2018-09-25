@@ -33,6 +33,8 @@
 #include <math.h>
 #include <ctype.h>
 
+processInputBufferProc *processInputBufferProcHook = NULL;
+
 static void setProtocolError(const char *errstr, client *c, long pos);
 
 /* Return the size consumed from the allocator, for the specified SDS string,
@@ -1354,11 +1356,18 @@ int processMultibulkBuffer(client *c) {
     return C_ERR;
 }
 
+void processInputBuffer(client *c) {
+	if(processInputBufferProcHook)
+		(*processInputBufferProc)(c);
+	else
+		standardProcessInputBuffer(c);
+}
+
 /* This function is called every time, in the client structure 'c', there is
  * more query buffer to process, because we read more data from the socket
  * or because a client was blocked and later reactivated, so there could be
  * pending query buffer, already representing a full command, to process. */
-void processInputBuffer(client *c) {
+void standardProcessInputBuffer(client *c) {
     server.current_client = c;
     /* Keep processing while there is something in the input buffer */
     while(sdslen(c->querybuf)) {

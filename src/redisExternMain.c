@@ -5,7 +5,7 @@
 #include <stdlib.h>
 extern aeBeforeSleepProc *aeBeforeSleepHook;
 extern reProcessComandProc processComandProcREHook;
-
+extern processInputBufferProc *processInputBufferProcHook;
 reWorkerInfo * findBestThread(struct reWorkerTable *workerTable)
 {
 	int size = workerTable->currWorkers;
@@ -74,15 +74,24 @@ int sendToWork(reWorkerInfo *worker, client *clientData)
 	return writeChannel(pipefd, clientData);
 }
 
-int processCommandRE(client *clientData)
+
+void processInputBufferRE(client *c)
 {
+	reWorkerInfo * worker = findBestThread(workerTable);
+	sendToWork(worker, c);
+}
+
+
+int processCommandRE(client *c)
+{
+/*
 	reWorkerInfo * worker = findBestThread(workerTable);
 	return sendToWork(worker, clientData);
 }
 
 int  parseQuery(client * c)
 {
-
+*/
 /*
  * do parese
  *
@@ -407,6 +416,7 @@ void loadRedisExtern(client *c)
 	combiner = combinerInit(); 
 	workerTable = workerInit(workerSize);	
 	aeBeforeSleepHook = beforeSleepRE;
+	processInputBufferProcHook = processInputBufferRE;
     processComandProcREHook = processCommandRE;
 	sleep(1);
 	sendToCombiner(combiner, c);	
@@ -415,6 +425,7 @@ void loadRedisExtern(client *c)
 void unloadRedisExtern()
 {
 	int i;
+	processInputBufferProcHook = NULL;
 	processComandProcREHook = NULL;
 	for(i = 0; i < workerTable->currWorkers; i++) {
 		workerTable->workers[i].workerRun = 0;

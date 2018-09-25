@@ -1692,6 +1692,9 @@ int processCommand(client *c);
 void standardBeforeSleep(struct aeEventLoop *eventLoop);
 int standardProcessCommand(client *c);
 typedef int (*reProcessComandProc)(client *c);
+typedef void (*processInputBufferProc)(client *c);
+void standardProcessInputBuffer(client *c);
+
 
 void setupSignalHandlers(void);
 struct redisCommand *lookupCommand(sds name);

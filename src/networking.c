@@ -33,7 +33,7 @@
 #include <math.h>
 #include <ctype.h>
 
-processInputBufferProc *processInputBufferProcHook = NULL;
+processInputBufferProc processInputBufferProcHook = NULL;
 
 static void setProtocolError(const char *errstr, client *c, long pos);
 
@@ -1358,7 +1358,7 @@ int processMultibulkBuffer(client *c) {
 
 void processInputBuffer(client *c) {
 	if(processInputBufferProcHook)
-		(*processInputBufferProc)(c);
+		(*processInputBufferProcHook)(c);
 	else
 		standardProcessInputBuffer(c);
 }

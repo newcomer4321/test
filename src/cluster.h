@@ -280,7 +280,7 @@ clusterNode *getNodeByQuery(client *c, struct redisCommand *cmd, robj **argv, in
 int clusterRedirectBlockedClientIfNeeded(client *c);
 void clusterRedirectClient(client *c, clusterNode *n, int hashslot, int error_code);
 
-clusterNode *getNodeBySlot(int *hashslot);
+clusterNode *getNodeBySlot(int hashslot);
 
 
 

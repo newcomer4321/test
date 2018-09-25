@@ -4516,7 +4516,7 @@ NULL
         if (server.cluster->slots[slot] == myself) {
 			addReplyLongLong(c,countKeysInSlot(slot));
         } else {
-			clusterNode *rightNode = getNodeBySlot(slot);
+			clusterNode *rightNode = getNodeBySlot((int)slot);
 			clusterRedirectClient(c, rightNode, slot, CLUSTER_REDIR_MOVED);
 		}
     } else if (!strcasecmp(c->argv[1]->ptr,"getkeysinslot") && c->argc == 4) {
@@ -5402,7 +5402,7 @@ void readwriteCommand(client *c) {
 }
 
 
-clusterNode *getNodeBySlot(int *hashslot)
+clusterNode *getNodeBySlot(int hashslot)
 {
 	dictIterator *di;
     dictEntry *de;

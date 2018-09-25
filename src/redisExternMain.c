@@ -5,7 +5,7 @@
 #include <stdlib.h>
 extern aeBeforeSleepProc *aeBeforeSleepHook;
 extern reProcessComandProc processComandProcREHook;
-extern processInputBufferProc *processInputBufferProcHook;
+extern processInputBufferProc processInputBufferProcHook;
 reWorkerInfo * findBestThread(struct reWorkerTable *workerTable)
 {
 	int size = workerTable->currWorkers;
@@ -331,7 +331,8 @@ void *workerThread(void *value)
             listNode *node = listPop(l);
 			client * clientData = (client *)turnToAddr(node->value);
 
-			parseQuery(clientData);
+			
+			processInputBuffer(clientData);
             zfree(node);
         }
     }

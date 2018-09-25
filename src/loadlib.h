@@ -87,7 +87,7 @@ struct reWorkerTable * workerInit(int workerSize);
 int sendToWork(reWorkerInfo *worker, client *clientData);
 
 int processCommandRE(client *cilientData);
-int parseQuery(client * clientData);
+//int parseQuery(client * clientData);
 int sendToCombiner(reCombinerInfo *combiner, client *clientData);
 
 void *workerThread(void *value);

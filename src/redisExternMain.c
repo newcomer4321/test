@@ -325,14 +325,13 @@ void *workerThread(void *value)
     while(run) {
         while(l->len == 0 || readlen > 0) {
             readlen = readChannel(fdPrimaryToWorker, l);
-            sleep(1);
         }
         while(l->len > 0) {
             listNode *node = listPop(l);
 			client * clientData = (client *)turnToAddr(node->value);
 
 			
-			processInputBuffer(clientData);
+			standardProcessInputBuffer(clientData);
             zfree(node);
         }
     }
@@ -388,7 +387,6 @@ void *combinerThread(void *value)
     while(run) {
         while(l->len == 0 || readlen > 0) {
             readlen = readChannel(pipefd, l);
-            //sleep(1);
         }
         while(l->len > 0) {
             listNode *node = listPop(l);
